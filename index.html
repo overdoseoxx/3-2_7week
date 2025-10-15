@@ -5,11 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>물을 만지세요 — blue panel shop</title>
 <style>
-  /* ===== Fonts ===== */
+  /* ===== 폰트 ===== */
   @font-face {
     font-family: 'Avivi22';
-    /* 오타 수정: noonfonts_five@2.0 */
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_five@2.0/UhBeeDoolDool.woff') format('woff');
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_five@.2.0/UhBeeDoolDool.woff') format('woff');
     font-weight: normal;
     font-display: swap;
   }
@@ -28,6 +27,7 @@
     --slot-hover:rgba(14,48,74,.78);
     --padX:18px;
 
+    /* 제목 크기(직전 버전 값 유지) */
     --titleSize: clamp(40px, 6vw, 90px);
   }
 
@@ -50,12 +50,14 @@
   /* 제목 묶음 */
   .title{
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    transform:translateY(-80px);
+    transform:translateY(-80px); /* 제목/미터를 위로 */
     gap:8px;
   }
-  .title-row{display:flex;align-items:flex-end;justify-content:center;gap:10px;}
+  .title-row{
+    display:flex;align-items:flex-end;justify-content:center;gap:10px;
+  }
   .splash{
-    height: clamp(80px, calc(var(--titleSize)*2), 260px);
+    height: clamp(80px, calc(var(--titleSize)*2), 260px); /* 제목 높이의 2배 */
     width:auto;
     filter:drop-shadow(0 0 14px rgba(0,255,255,.30));
   }
@@ -66,7 +68,7 @@
     text-align:center; white-space:pre-line;
   }
 
-  /* 카운터 */
+  /* 카운터(제목 쪽으로 타이트) */
   .meter{text-align:center;margin-top:-6px;font-variant-numeric:tabular-nums}
   .big{font-size:clamp(24px,4.8vw,52px);font-weight:400;letter-spacing:.04em;color:#b5f7cc;margin-bottom:-8px}
   .small{color:var(--muted);margin-top:-4px;font-size:13.5px}
@@ -95,16 +97,16 @@
   }
   @keyframes swim{0%{left:100%}100%{left:-240px}}
 
-  /* 꽃게 gif: 상점 바로 위 오른쪽에서 좌우 왕복 */
+  /* 꽃게 gif: 상점 바로 위 오른쪽에서 좌우 왕복(200px) - 시작 더 오른쪽, 속도 느리게 */
   .crab-gif{
-    position:absolute; right:-48px; bottom:calc(100% + 6px);
+    position:absolute; right:-48px; bottom:calc(100% + 6px); /* ▶ 더 오른쪽에서 시작 */
     width:min(20vw,180px); display:none; pointer-events:none; z-index:4;
     filter:drop-shadow(0 6px 18px rgba(0,0,0,.35));
-    animation:crab-walk 5.6s ease-in-out infinite alternate;
+    animation:crab-walk 5.6s ease-in-out infinite alternate; /* ▶ 느리게 */
   }
   @keyframes crab-walk{
     from{ transform:translateX(0); }
-    to  { transform:translateX(-220px); }
+    to  { transform:translateX(-220px); } /* ▶ 왼쪽으로 ~220px 갔다가 복귀 */
   }
 
   .shop-surface{
@@ -186,22 +188,22 @@
 
         <div class="shop-surface">
           <div class="shop">
-            <!-- 1) conch -->
+            <!-- 1) 소라 -->
             <div class="slot" data-buy="conch">
               <div class="icon-box"><img src="conch.png" alt=""></div>
               <div class="price"><img class="icon-water" src="water.png" alt=""><span id="price-conch">30</span></div>
             </div>
-            <!-- 2) seaweed -->
+            <!-- 2) 해초 -->
             <div class="slot" data-buy="seaweed">
               <div class="icon-box"><img src="seaweed.png" alt=""></div>
               <div class="price"><img class="icon-water" src="water.png" alt=""><span id="price-seaweed">50</span></div>
             </div>
-            <!-- 3) fish -->
+            <!-- 3) 물고기 -->
             <div class="slot" data-buy="fish">
               <div class="icon-box"><img src="fish.png" alt=""></div>
               <div class="price"><img class="icon-water" src="water.png" alt=""><span id="price-fish">300</span></div>
             </div>
-            <!-- 4) crab -->
+            <!-- 4) 꽃게 -->
             <div class="slot" data-buy="crab">
               <div class="icon-box"><img src="crab.png" alt="crab"></div>
               <div class="price"><img class="icon-water" src="water.png" alt=""><span id="price-crab">480</span></div>
@@ -243,7 +245,10 @@ function addWater(a){water+=a;events.push({t:nowMs(),a});
   const cut=nowMs()-1000;while(events.length&&events[0].t<cut)events.shift();
   counter.textContent=Math.floor(water).toString().padStart(9,'0');}
 
-stage.addEventListener('pointerdown',()=>{addWater(tapPower);showPlusOne(tapPower);});
+stage.addEventListener('pointerdown',()=>{
+  addWater(tapPower);
+  showPlusOne(tapPower);
+});
 
 /* 클릭 사운드(오디오 풀) */
 const proto=document.getElementById('clickProto');const poolSize=8;const clickPool=[];let poolIdx=0;
@@ -278,7 +283,7 @@ function showPlusOne(val){
   el.innerHTML=`+${val} <img class="icon-water" src="water.png" alt="물">`;
   document.body.appendChild(el);
   el.style.left=(rect.left+rect.width/2)+'px';
-  el.style.top=(rect.top+10)+'px';
+  el.style.top=(rect.top+10)+'px'; // 제목 바로 아래에서 자연스럽게
   el.addEventListener('animationend',()=>el.remove(),{once:true});
 }
 function showGainAt(target,text='+10'){
@@ -334,13 +339,13 @@ fishCard.addEventListener('click',()=>{
   tapPower=3; fishGif.style.display='block';
 });
 
-/* 꽃게: 클릭 파워 +6, 상점 위 오른쪽에서 왕복 */
+/* 꽃게: 클릭 파워 +6, 상점 위 오른쪽에서 200px 왕복(느리게, 시작 더 오른쪽) */
 crabCard.addEventListener('click',()=>{
   if(crabOwned)return;
   if(water<crabPrice){nudge(crabCard);return;}
   addWater(-crabPrice); crabOwned=true; crabCard.classList.add('owned');
-  tapPower=6;
-  crabGif.style.display='block';
+  tapPower=6;                     // ▶ 클릭을 +6으로
+  crabGif.style.display='block';  // ▶ 왕복 애니메이션은 CSS에서 무한 반복
 });
 
 /* 작게 흔들림 피드백 */
@@ -348,3 +353,5 @@ function nudge(el){el.style.transform='translateX(-3px)';setTimeout(()=>el.style
 </script>
 </body>
 </html>
+
+
