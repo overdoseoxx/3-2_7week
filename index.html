@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>물을 만지세요 — blue panel shop</title>
+<style>
+  /* ===== Fonts ===== */
+  @font-face {
+    font-family: 'Avivi22';
+    /* 오타 수정: noonfonts_five@2.0 */
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_five@2.0/UhBeeDoolDool.woff') format('woff');
+    font-weight: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'OngleipSeunghun';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408@1.0/Ownglyph_Seung_Hoon-Rg.woff2') format('woff2');
+    font-weight: normal;
+    font-display: swap;
+  }
+
+  :root{
+    --bg:#052233; --top:#0b3a54; --bottom:#041a27;
+    --text:#cfe9ff; --muted:#9fbcd0;
+    --panel:rgba(8,28,48,.55);
+    --slot:rgba(10,36,58,.62);
+    --slot-hover:rgba(14,48,74,.78);
+    --padX:18px;
+
+    --titleSize: clamp(40px, 6vw, 90px);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{
+    height:100%;
+    background:var(--bg); color:var(--text);
+    font-family:'Avivi22',ui-sans-serif,system-ui,"Noto Sans KR",Arial;
+    overflow:hidden;
+  }
+
+  .wrap{display:grid;grid-template-rows:1fr auto;min-height:100vh}
+
+  /* ===== TOP ===== */
+  .top{position:relative;overflow:hidden;
+    background:radial-gradient(120% 120% at 50% -10%,var(--top),var(--bg))}
+  #stage{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+  .center-hud{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+
+  /* 제목 묶음 */
+  .title{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    transform:translateY(-80px);
+    gap:8px;
+  }
+  .title-row{display:flex;align-items:flex-end;justify-content:center;gap:10px;}
+  .splash{
+    height: clamp(80px, calc(var(--titleSize)*2), 260px);
+    width:auto;
+    filter:drop-shadow(0 0 14px rgba(0,255,255,.30));
+  }
+  .title h1{
+    font-family:'OngleipSeunghun',sans-serif;
+    color:#00F6FF; font-weight:700;
+    font-size:var(--titleSize); line-height:1.12;
+    text-align:center; white-space:pre-line;
+  }
+
+  /* 카운터 */
+  .meter{text-align:center;margin-top:-6px;font-variant-numeric:tabular-nums}
+  .big{font-size:clamp(24px,4.8vw,52px);font-weight:400;letter-spacing:.04em;color:#b5f7cc;margin-bottom:-8px}
+  .small{color:var(--muted);margin-top:-4px;font-size:13.5px}
+
+  .corner-gif{position:absolute;top:14px;right:14px;width:min(18vw,140px);display:none;z-index:5}
+
+  /* ===== BOTTOM / Shop ===== */
+  .bottom{position:relative;background:linear-gradient(to bottom,var(--bottom),#031521);padding:24px 18px 28px}
+  .shop-group{width:fit-content;margin:0 auto}
+  .shop-stack{position:relative;width:fit-content;margin:0 auto}
+
+  /* 해초 gif: 패널 바로 위 중앙 */
+  .seaweed-gif{
+    position:absolute;left:50%;transform:translateX(-50%);
+    bottom:calc(100% + 6px);
+    width:min(28vw,220px);opacity:.95;display:none;pointer-events:none;z-index:4;
+    filter:drop-shadow(0 6px 18px rgba(0,0,0,.35))
+  }
+
+  /* 물고기 gif: 오른쪽→왼쪽 무한 횡단 */
+  .fish-gif{
+    position:fixed;top:50%;transform:translateY(-50%);
+    left:100%; width:min(22vw,200px); display:none; pointer-events:none; z-index:4;
+    filter:drop-shadow(0 6px 18px rgba(0,0,0,.35));
+    animation:swim 22s linear infinite;
+  }
+  @keyframes swim{0%{left:100%}100%{left:-240px}}
+
+  /* 꽃게 gif: 상점 바로 위 오른쪽에서 좌우 왕복 */
+  .crab-gif{
+    position:absolute; right:-48px; bottom:calc(100% + 6px);
+    width:min(20vw,180px); display:none; pointer-events:none; z-index:4;
+    filter:drop-shadow(0 6px 18px rgba(0,0,0,.35));
+    animation:crab-walk 5.6s ease-in-out infinite alternate;
+  }
+  @keyframes crab-walk{
+    from{ transform:translateX(0); }
+    to  { transform:translateX(-220px); }
+  }
+
+  .shop-surface{
+    display:inline-block;background:var(--panel);border-radius:22px;
+    padding:16px var(--padX);box-shadow:0 14px 36px rgba(0,0,0,.35);
+    backdrop-filter:blur(2px);width:fit-content;
+  }
+  .shop{
+    display:grid;grid-template-columns:repeat(4,172px);justify-content:center;gap:20px;
+  }
+  .slot{
+    width:172px;height:190px;background:var(--slot);border-radius:18px;
+    display:grid;grid-template-rows:1fr auto;align-items:end;justify-items:center;
+    padding:12px 12px 28px;cursor:pointer;
+    transition:transform .12s ease,background .12s ease,opacity .12s ease;
+    box-shadow:0 8px 20px rgba(0,0,0,.24);overflow:hidden;
+  }
+  .slot:hover{transform:translateY(-2px);background:var(--slot-hover)}
+  .slot.owned{opacity:.52}
+  .icon-box{width:100%;height:124px;display:grid;place-items:center;margin-bottom:10px;overflow:visible}
+  .icon-box img{width:100%;height:100%;object-fit:contain;aspect-ratio:10/9;filter:drop-shadow(0 3px 8px rgba(0,0,0,.35))}
+  .price{display:flex;align-items:center;gap:6px;margin:8px 0 0;font-size:20px;font-weight:400}
+  .icon-water{width:16px;height:16px;object-fit:contain}
+
+  .under-row{width:100%;margin:12px 0 0;display:flex;align-items:center;justify-content:flex-start;gap:12px;padding-left:var(--padX)}
+  .cursor-chip{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:rgba(8,28,48,.7);color:#d5f2ff;font-weight:800;box-shadow:0 8px 18px rgba(0,0,0,.28)}
+
+  /* Bubbles */
+  .bubble{--flip:1;position:absolute;width:72px;height:72px;pointer-events:auto;cursor:pointer;animation:rise var(--dur,8s) linear forwards}
+  @keyframes rise{0%{transform:translateY(0) scale(1) scaleX(var(--flip));opacity:1}
+                  100%{transform:translateY(-110vh) scale(.6) scaleX(var(--flip));opacity:0}}
+  .bubble.pop{animation:pop .25s ease-out forwards}
+  @keyframes pop{from{transform:scale(1) scaleX(var(--flip));opacity:1}
+                 to{transform:scale(1.3) scaleX(var(--flip));opacity:0}}
+
+  /* Gain badges */
+  .gain-badge, .plus-one{
+    position:fixed;left:0;top:0;transform:translate(-50%,-50%);
+    font-size:18px;color:#b5f7cc;font-weight:600;opacity:0;pointer-events:none;white-space:nowrap;
+    animation:riseGain .9s ease-out forwards;filter:drop-shadow(0 2px 6px rgba(0,0,0,.35))
+  }
+  .gain-badge .icon-water,.plus-one .icon-water{width:12px;height:12px}
+  @keyframes riseGain{
+    0%{opacity:0;transform:translate(-50%,-10px)}
+    20%{opacity:1;transform:translate(-50%,-20px)}
+    100%{opacity:0;transform:translate(-50%,-80px)}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- TOP -->
+  <section class="top">
+    <img id="conchGif" class="corner-gif" src="conch.gif" alt="conch"/>
+    <canvas id="stage"></canvas>
+    <div class="center-hud">
+      <div class="title">
+        <div class="title-row">
+          <img class="splash" src="splash-left.png" alt="왼쪽 스플래쉬">
+          <h1>물을
+만지세요</h1>
+          <img class="splash" src="splash-right.png" alt="오른쪽 스플래쉬">
+        </div>
+        <div class="meter">
+          <div class="big" id="counter">000000000</div>
+          <div class="small"><span id="gps">0</span> water per second</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOTTOM / SHOP -->
+  <section class="bottom">
+    <div class="shop-group">
+      <div class="shop-stack">
+        <!-- 상점 바로 위 중앙 해초, 오른쪽 꽃게 -->
+        <img id="seaweedGif" class="seaweed-gif" src="seaweed.gif" alt="seaweed power-up"/>
+        <img id="crabGif" class="crab-gif" src="crab.gif" alt="crabby power-up"/>
+
+        <div class="shop-surface">
+          <div class="shop">
+            <!-- 1) conch -->
+            <div class="slot" data-buy="conch">
+              <div class="icon-box"><img src="conch.png" alt=""></div>
+              <div class="price"><img class="icon-water" src="water.png" alt=""><span id="price-conch">30</span></div>
+            </div>
+            <!-- 2) seaweed -->
+            <div class="slot" data-buy="seaweed">
+              <div class="icon-box"><img src="seaweed.png" alt=""></div>
+              <div class="price"><img class="icon-water" src="water.png" alt=""><span id="price-seaweed">50</span></div>
+            </div>
+            <!-- 3) fish -->
+            <div class="slot" data-buy="fish">
+              <div class="icon-box"><img src="fish.png" alt=""></div>
+              <div class="price"><img class="icon-water" src="water.png" alt=""><span id="price-fish">300</span></div>
+            </div>
+            <!-- 4) crab -->
+            <div class="slot" data-buy="crab">
+              <div class="icon-box"><img src="crab.png" alt="crab"></div>
+              <div class="price"><img class="icon-water" src="water.png" alt=""><span id="price-crab">480</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 패널 왼쪽에 맞춘 커서칩 -->
+      <div class="under-row">
+        <div class="cursor-chip">
+          <img class="icon-water" src="water.png" alt=""><span id="tapPrice">2430</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- 사운드 -->
+<audio id="bgm" src="conch.mp3" loop preload="auto" playsinline></audio>
+<audio id="clickProto" src="click.mp3" preload="auto" playsinline></audio>
+
+<!-- 물고기 GIF (오른쪽→왼쪽 무한 횡단) -->
+<img id="fishGif" class="fish-gif" src="fish.gif" alt="swimming fish"/>
+
+<script>
+/* ===== 배경 캔버스 루프 ===== */
+const stage=document.getElementById('stage');const ctx=stage.getContext('2d');
+function resize(){const dpr=Math.min(2,window.devicePixelRatio||1);
+  stage.width=stage.clientWidth*dpr;stage.height=stage.clientHeight*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
+addEventListener('resize',resize);resize();
+(function loop(){ctx.clearRect(0,0,stage.clientWidth,stage.clientHeight);requestAnimationFrame(loop);})();
+
+/* ===== 카운터 / 클릭 ===== */
+let water=0,tapPower=1;
+const counter=document.getElementById('counter'),gpsEl=document.getElementById('gps');
+const events=[];const nowMs=()=>performance.now();
+function addWater(a){water+=a;events.push({t:nowMs(),a});
+  const cut=nowMs()-1000;while(events.length&&events[0].t<cut)events.shift();
+  counter.textContent=Math.floor(water).toString().padStart(9,'0');}
+
+stage.addEventListener('pointerdown',()=>{addWater(tapPower);showPlusOne(tapPower);});
+
+/* 클릭 사운드(오디오 풀) */
+const proto=document.getElementById('clickProto');const poolSize=8;const clickPool=[];let poolIdx=0;
+function initPool(){for(let i=0;i<poolSize;i++){const a=proto.cloneNode(true);a.removeAttribute('id');document.body.appendChild(a);clickPool.push(a);}}
+function playClick(){if(!clickPool.length)return;const a=clickPool[poolIdx];poolIdx=(poolIdx+1)%clickPool.length;try{a.currentTime=0;a.play();}catch(e){}}
+let poolReady=false;document.addEventListener('pointerdown',()=>{if(!poolReady){initPool();poolReady=true;}playClick();},{passive:true});
+
+/* GPS(최근 1초 획득량) */
+setInterval(()=>{const cut=nowMs()-1000;while(events.length&&events[0].t<cut)events.shift();
+  const per=events.reduce((s,e)=>s+e.a,0);gpsEl.textContent=Math.floor(per);},100);
+
+/* 공깃방울 */
+function spawnBubble(){
+  const b=document.createElement('img');b.src='bubble.gif';b.className='bubble';
+  const size=70+Math.random()*50;b.style.width=size+'px';b.style.height=size+'px';
+  b.style.left=Math.random()*innerWidth+'px';b.style.bottom='-48px';
+  if(Math.random()<0.4)b.style.setProperty('--flip','-1');
+  b.style.setProperty('--dur',(7+Math.random()*3+(size>90?1:0))+'s');
+  b.addEventListener('pointerdown',e=>{
+    e.stopPropagation();addWater(10);showGainAt(b,'+10');b.classList.add('pop');
+    b.addEventListener('animationend',()=>b.remove(),{once:true});
+  });
+  b.addEventListener('animationend',()=>b.remove(),{once:true});
+  document.body.appendChild(b);
+}
+setInterval(()=>{if(Math.random()<0.35)spawnBubble();},1200);
+
+/* 떠오르는 배지 (+1 / +10) */
+function showPlusOne(val){
+  const title=document.querySelector('.title'); const rect=title.getBoundingClientRect();
+  const el=document.createElement('div');el.className='plus-one';
+  el.innerHTML=`+${val} <img class="icon-water" src="water.png" alt="물">`;
+  document.body.appendChild(el);
+  el.style.left=(rect.left+rect.width/2)+'px';
+  el.style.top=(rect.top+10)+'px';
+  el.addEventListener('animationend',()=>el.remove(),{once:true});
+}
+function showGainAt(target,text='+10'){
+  const r=target.getBoundingClientRect(); const el=document.createElement('div');el.className='gain-badge';
+  el.innerHTML=`${text} <img class="icon-water" src="water.png" alt="물">`; document.body.appendChild(el);
+  el.style.left=(r.left+r.width/2)+'px'; el.style.top=(r.top+r.height*0.3)+'px';
+  el.addEventListener('animationend',()=>el.remove(),{once:true});
+}
+
+/* ===== 상점 로직 ===== */
+const conchPrice=30, seaweedPrice=50, fishPrice=300, crabPrice=480;
+
+const conchCard=document.querySelector('.slot[data-buy="conch"]');
+const seaweedCard=document.querySelector('.slot[data-buy="seaweed"]');
+const fishCard=document.querySelector('.slot[data-buy="fish"]');
+const crabCard=document.querySelector('.slot[data-buy="crab"]');
+
+const conchGif=document.getElementById('conchGif');
+const seaweedGif=document.getElementById('seaweedGif');
+const fishGif=document.getElementById('fishGif');
+const crabGif=document.getElementById('crabGif');
+const bgm=document.getElementById('bgm');
+
+let conchOwned=false, seaweedOwned=false, fishOwned=false, crabOwned=false, seaweedTimer=null;
+
+/* 소라: GIF + 배경음 */
+conchCard.addEventListener('click',()=>{
+  if(conchOwned)return;
+  if(water<conchPrice){nudge(conchCard);return;}
+  addWater(-conchPrice); conchOwned=true; conchCard.classList.add('owned');
+  conchGif.style.display='block'; bgm.currentTime=0; bgm.play().catch(()=>{});
+});
+
+/* 해초: 초당 +10, GIF */
+seaweedCard.addEventListener('click',()=>{
+  if(seaweedOwned)return;
+  if(water<seaweedPrice){nudge(seaweedCard);return;}
+  addWater(-seaweedPrice); seaweedOwned=true; seaweedCard.classList.add('owned');
+  seaweedGif.style.display='block';
+  if(!seaweedTimer){
+    seaweedTimer=setInterval(()=>{
+      addWater(10);
+      if(seaweedGif.style.display!=='none'){showGainAt(seaweedGif,'+10');}
+    },1000);
+  }
+});
+
+/* 물고기: 클릭 파워 +3, 화면 횡단 GIF */
+fishCard.addEventListener('click',()=>{
+  if(fishOwned)return;
+  if(water<fishPrice){nudge(fishCard);return;}
+  addWater(-fishPrice); fishOwned=true; fishCard.classList.add('owned');
+  tapPower=3; fishGif.style.display='block';
+});
+
+/* 꽃게: 클릭 파워 +6, 상점 위 오른쪽에서 왕복 */
+crabCard.addEventListener('click',()=>{
+  if(crabOwned)return;
+  if(water<crabPrice){nudge(crabCard);return;}
+  addWater(-crabPrice); crabOwned=true; crabCard.classList.add('owned');
+  tapPower=6;
+  crabGif.style.display='block';
+});
+
+/* 작게 흔들림 피드백 */
+function nudge(el){el.style.transform='translateX(-3px)';setTimeout(()=>el.style.transform='',200);}
+</script>
+</body>
+</html>
